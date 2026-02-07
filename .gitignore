@@ -17,6 +17,7 @@ phase-2-web/frontend/.env.*.local
 # --- Backend env ---
 phase-2-web/backend/.env
 phase-2-web/backend/.env.*
+phase-2-web/backend/.venv/
 
 # --- OS ---
 .DS_Store
