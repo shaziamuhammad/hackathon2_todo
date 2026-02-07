@@ -2,3 +2,22 @@
 .pytest_cache/
 *.pyc
 .claude/settings.local.json
+.env
+
+# Ignore Next.js build directory
+.next/
+node_modules/
+# --- Frontend ---
+phase-2-web/frontend/node_modules/
+phase-2-web/frontend/.next/
+phase-2-web/frontend/out/
+phase-2-web/frontend/.env.local
+phase-2-web/frontend/.env.*.local
+
+# --- Backend env ---
+phase-2-web/backend/.env
+phase-2-web/backend/.env.*
+
+# --- OS ---
+.DS_Store
+Thumbs.db
