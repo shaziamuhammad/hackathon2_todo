@@ -47,7 +47,7 @@ export default function TaskList({ tasks, onUpdate, onDelete, onToggleComplete, 
               <input
                 type="checkbox"
                 checked={task.completed}
-                onChange={() => onToggleComplete(task.id, task.completed)}
+                onChange={() => onToggleComplete(task.id, !task.completed)}
                 className="mt-1 h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
               />
               <div>
