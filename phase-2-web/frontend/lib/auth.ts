@@ -4,9 +4,22 @@
  */
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
+import FacebookProvider from 'next-auth/providers/facebook';
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    // Google OAuth Provider
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    }),
+    // Facebook OAuth Provider
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID || '',
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
+    }),
+    // Email/Password Provider
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
@@ -56,10 +69,15 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.accessToken = (user as any).accessToken;
         token.id = user.id;
+      }
+      // Handle OAuth providers
+      if (account?.provider === 'google' || account?.provider === 'facebook') {
+        token.provider = account.provider;
+        token.providerAccountId = account.providerAccountId;
       }
       return token;
     },
@@ -70,6 +88,7 @@ export const authOptions: NextAuthOptions = {
           id: token.id as string,
         };
         (session as any).accessToken = token.accessToken;
+        (session as any).provider = token.provider;
       }
       return session;
     },

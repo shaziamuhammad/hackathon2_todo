@@ -171,15 +171,15 @@ description: "Task list for AI-Powered Todo Chatbot implementation"
 
 ### Enhanced Authentication for User Story 3
 
-- [ ] T075 [US3] Configure NextAuth.js in phase-2-web/frontend/src/app/api/auth/[...nextauth]/route.ts
-- [ ] T076 [US3] Add Google OAuth provider configuration in phase-2-web/frontend/src/app/api/auth/[...nextauth]/route.ts
-- [ ] T077 [US3] Add Facebook OAuth provider configuration in phase-2-web/frontend/src/app/api/auth/[...nextauth]/route.ts
-- [ ] T078 [US3] Update phase-2-web/frontend/src/app/login/page.tsx to add OAuth login buttons (Google, Facebook)
-- [ ] T079 [US3] Implement password visibility toggle in phase-2-web/frontend/src/app/login/page.tsx
-- [ ] T080 [US3] Add character length indicator for password field in phase-2-web/frontend/src/app/login/page.tsx
-- [ ] T081 [US3] Add password strength indicator in phase-2-web/frontend/src/app/login/page.tsx
-- [ ] T082 [US3] Update backend authentication in phase-2-web/backend/auth.py to handle OAuth tokens from NextAuth.js
-- [ ] T083 [US3] Create POST /api/auth/oauth endpoint in phase-2-web/backend/main.py to verify OAuth tokens
+- [X] T075 [US3] Configure NextAuth.js in phase-2-web/frontend/src/app/api/auth/[...nextauth]/route.ts
+- [X] T076 [US3] Add Google OAuth provider configuration in phase-2-web/frontend/src/app/api/auth/[...nextauth]/route.ts
+- [X] T077 [US3] Add Facebook OAuth provider configuration in phase-2-web/frontend/src/app/api/auth/[...nextauth]/route.ts
+- [X] T078 [US3] Update phase-2-web/frontend/src/app/login/page.tsx to add OAuth login buttons (Google, Facebook)
+- [X] T079 [US3] Implement password visibility toggle in phase-2-web/frontend/src/app/login/page.tsx
+- [X] T080 [US3] Add character length indicator for password field in phase-2-web/frontend/src/app/login/page.tsx
+- [X] T081 [US3] Add password strength indicator in phase-2-web/frontend/src/app/login/page.tsx
+- [X] T082 [US3] Update backend authentication in phase-2-web/backend/auth.py to handle OAuth tokens from NextAuth.js
+- [X] T083 [US3] Create POST /api/auth/oauth endpoint in phase-2-web/backend/main.py to verify OAuth tokens
 
 ### Sidebar Filtering and Sorting for User Story 3
 
@@ -211,8 +211,8 @@ description: "Task list for AI-Powered Todo Chatbot implementation"
 - [X] T100 [P] Add accessibility attributes (ARIA labels) to all UI components in phase-2-web/frontend/src/components/
 - [X] T101 Update README.md with setup instructions from quickstart.md
 - [X] T102 Create API documentation from contracts/api.yaml in docs/api.md
-- [ ] T103 Run quickstart.md validation to ensure all setup steps work correctly
-- [ ] T104 Verify all success criteria from spec.md are met (95% accuracy, 3-second response time, etc.)
+- [X] T103 Run quickstart.md validation to ensure all setup steps work correctly
+- [X] T104 Verify all success criteria from spec.md are met (95% accuracy, 3-second response time, etc.)
 
 ---
 
