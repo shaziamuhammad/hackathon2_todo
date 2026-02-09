@@ -216,7 +216,7 @@ export default function ChatWidget({ userId }: ChatWidgetProps) {
             onKeyPress={handleKeyPress}
             placeholder="Type your message..."
             disabled={isLoading}
-            className="flex-1 px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 disabled:bg-gray-100"
+            className="flex-1 px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600 disabled:bg-gray-100 text-gray-900 bg-white"
           />
           <button
             onClick={sendMessage}
