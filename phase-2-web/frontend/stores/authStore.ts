@@ -47,7 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const response = await api.post('/auth/register', { email, password })
 
-      if (response.status !== 200) {
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error('Registration failed')
       }
 
@@ -62,7 +62,9 @@ export const useAuthStore = create<AuthState>((set) => ({
         user: data.user
       })
     } catch (error: any) {
-      throw new Error(error.message || 'Registration failed')
+      console.error('Registration error:', error)
+      const errorMessage = error.response?.data?.detail || error.message || 'Registration failed'
+      throw new Error(errorMessage)
     }
   },
 
