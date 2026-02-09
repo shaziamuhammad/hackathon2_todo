@@ -20,9 +20,9 @@ export default function LoginPage() {
 
     let score = 0
 
-    // Length check
-    if (pwd.length >= 8) score++
-    if (pwd.length >= 12) score++
+    // Length check (minimum 6 for backend compatibility)
+    if (pwd.length >= 6) score++
+    if (pwd.length >= 10) score++
 
     // Character variety checks
     if (/[a-z]/.test(pwd)) score++
@@ -130,8 +130,8 @@ export default function LoginPage() {
               {/* Character Length Indicator */}
               <div className="text-xs text-gray-600">
                 Password length: {password.length} characters
-                {password.length < 8 && (
-                  <span className="text-red-600 ml-2">(minimum 8 required)</span>
+                {password.length < 6 && (
+                  <span className="text-red-600 ml-2">(minimum 6 required)</span>
                 )}
               </div>
 
