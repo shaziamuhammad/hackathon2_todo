@@ -38,4 +38,4 @@ The app will run on `http://localhost:3000`.
 - `npm start`: Start the development server
 - `npm run build`: Build the app for production
 - `npm test`: Run tests
-- `npm run eject`: Eject from Create React App (irreversible)
+- `npm run eject`: Eject from Create React App (irreversible)# Force rebuild
