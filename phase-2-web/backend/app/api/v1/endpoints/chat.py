@@ -1,6 +1,6 @@
 """
 Chat endpoint for AI-powered todo management
-Uses OpenAI Assistants API with MCP tool integration
+Uses OpenRouter Chat Completions API with function calling
 """
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel

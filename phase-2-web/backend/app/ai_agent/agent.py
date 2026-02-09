@@ -1,6 +1,6 @@
 """
 AI Agent for Todo Task Management
-Uses OpenAI Assistants API with MCP tool integration
+Uses OpenRouter Chat Completions API with function calling
 """
 from openai import AsyncOpenAI
 from typing import Dict, Any, List, Optional
@@ -12,12 +12,15 @@ from app.core.config import settings
 # Set up logging
 logger = logging.getLogger(__name__)
 
-# Initialize OpenAI client
-client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
-logger.info("OpenAI client initialized for AI agent")
+# Initialize OpenRouter client (OpenAI-compatible API)
+client = AsyncOpenAI(
+    api_key=settings.OPENROUTER_API_KEY,
+    base_url="https://openrouter.ai/api/v1"
+)
+logger.info("OpenRouter client initialized for AI agent")
 
-# Assistant instructions
-ASSISTANT_INSTRUCTIONS = """You are an AI-powered todo task management assistant. You help users manage their tasks through natural language conversations.
+# Assistant instructions (now used as system message)
+SYSTEM_MESSAGE = """You are an AI-powered todo task management assistant. You help users manage their tasks through natural language conversations.
 
 Your capabilities:
 - Create new tasks with titles, descriptions, priorities, due dates, tags, and recurrence patterns
@@ -241,12 +244,13 @@ TOOL_DEFINITIONS = [
 
 
 class TodoAssistant:
-    """OpenAI Assistant for Todo Task Management"""
+    """OpenRouter Chat Completions Assistant for Todo Task Management"""
 
     def __init__(self):
         self.client = client
-        self.assistant_id = None
         self.tool_handlers = None
+        self.model = "openai/gpt-3.5-turbo"  # Default model, can be changed
+        self.conversations = {}  # Store conversation history per thread_id
 
     async def initialize(self, tool_handlers: Dict[str, Any]):
         """
@@ -256,34 +260,23 @@ class TodoAssistant:
             tool_handlers: Dictionary mapping tool names to their handler functions
         """
         self.tool_handlers = tool_handlers
-
-        # Create or retrieve assistant
-        try:
-            # For now, create a new assistant each time
-            # In production, you'd want to store and reuse the assistant_id
-            assistant = await self.client.beta.assistants.create(
-                name="Todo Task Manager",
-                instructions=ASSISTANT_INSTRUCTIONS,
-                model="gpt-4-turbo-preview",
-                tools=TOOL_DEFINITIONS
-            )
-            self.assistant_id = assistant.id
-            return assistant
-        except Exception as e:
-            raise Exception(f"Failed to initialize assistant: {str(e)}")
+        logger.info(f"TodoAssistant initialized with model: {self.model}")
+        return self
 
     async def create_thread(self) -> str:
-        """Create a new conversation thread"""
-        thread = await self.client.beta.threads.create()
-        return thread.id
+        """Create a new conversation thread (generate unique ID)"""
+        import uuid
+        thread_id = str(uuid.uuid4())
+        self.conversations[thread_id] = []
+        return thread_id
 
     async def add_message(self, thread_id: str, content: str) -> Dict[str, Any]:
         """Add a user message to the thread"""
-        message = await self.client.beta.threads.messages.create(
-            thread_id=thread_id,
-            role="user",
-            content=content
-        )
+        if thread_id not in self.conversations:
+            self.conversations[thread_id] = []
+
+        message = {"role": "user", "content": content}
+        self.conversations[thread_id].append(message)
         return message
 
     async def run_assistant(self, thread_id: str, user_id: str) -> str:
@@ -297,74 +290,95 @@ class TodoAssistant:
         Returns:
             The assistant's response text
         """
-        # Create a run
-        run = await self.client.beta.threads.runs.create(
-            thread_id=thread_id,
-            assistant_id=self.assistant_id
-        )
+        if thread_id not in self.conversations:
+            raise Exception(f"Thread {thread_id} not found")
 
-        # Poll for completion and handle tool calls
-        while True:
-            run = await self.client.beta.threads.runs.retrieve(
-                thread_id=thread_id,
-                run_id=run.id
-            )
+        # Build messages with system message
+        messages = [{"role": "system", "content": SYSTEM_MESSAGE}]
+        messages.extend(self.conversations[thread_id])
 
-            if run.status == "completed":
-                break
-            elif run.status == "requires_action":
-                # Handle tool calls
-                tool_outputs = []
-                for tool_call in run.required_action.submit_tool_outputs.tool_calls:
-                    function_name = tool_call.function.name
-                    function_args = json.loads(tool_call.function.arguments)
+        max_iterations = 10  # Prevent infinite loops
+        iteration = 0
 
-                    # Add user_id to function args
-                    function_args["user_id"] = user_id
+        while iteration < max_iterations:
+            iteration += 1
 
-                    # Execute the tool
-                    if function_name in self.tool_handlers:
-                        result = await self.tool_handlers[function_name](**function_args)
-                        tool_outputs.append({
+            try:
+                # Call the chat completion API
+                response = await self.client.chat.completions.create(
+                    model=self.model,
+                    messages=messages,
+                    tools=TOOL_DEFINITIONS,
+                    tool_choice="auto"
+                )
+
+                assistant_message = response.choices[0].message
+
+                # Check if the assistant wants to call functions
+                if assistant_message.tool_calls:
+                    # Add assistant message to conversation
+                    messages.append({
+                        "role": "assistant",
+                        "content": assistant_message.content,
+                        "tool_calls": [
+                            {
+                                "id": tc.id,
+                                "type": tc.type,
+                                "function": {
+                                    "name": tc.function.name,
+                                    "arguments": tc.function.arguments
+                                }
+                            }
+                            for tc in assistant_message.tool_calls
+                        ]
+                    })
+
+                    # Execute tool calls
+                    for tool_call in assistant_message.tool_calls:
+                        function_name = tool_call.function.name
+                        function_args = json.loads(tool_call.function.arguments)
+
+                        # Add user_id to function args
+                        function_args["user_id"] = user_id
+
+                        # Execute the tool
+                        if function_name in self.tool_handlers:
+                            try:
+                                result = await self.tool_handlers[function_name](**function_args)
+                                tool_result = json.dumps(result)
+                            except Exception as e:
+                                tool_result = json.dumps({"error": str(e)})
+                        else:
+                            tool_result = json.dumps({"error": f"Unknown function: {function_name}"})
+
+                        # Add tool response to messages
+                        messages.append({
+                            "role": "tool",
                             "tool_call_id": tool_call.id,
-                            "output": json.dumps(result)
+                            "content": tool_result
                         })
 
-                # Submit tool outputs
-                await self.client.beta.threads.runs.submit_tool_outputs(
-                    thread_id=thread_id,
-                    run_id=run.id,
-                    tool_outputs=tool_outputs
-                )
-            elif run.status in ["failed", "cancelled", "expired"]:
-                # Get detailed error information
-                error_message = f"Run failed with status: {run.status}"
-                if hasattr(run, 'last_error') and run.last_error:
-                    error_message += f" - Error: {run.last_error.code}: {run.last_error.message}"
-                raise Exception(error_message)
+                    # Continue loop to get final response
+                    continue
 
-            # Wait a bit before polling again
-            await asyncio.sleep(1)
+                else:
+                    # No more tool calls, we have the final response
+                    response_text = assistant_message.content or "I apologize, but I couldn't generate a response."
 
-        # Get the assistant's messages
-        messages = await self.client.beta.threads.messages.list(
-            thread_id=thread_id,
-            order="desc",
-            limit=1
-        )
+                    # Add assistant response to conversation history
+                    self.conversations[thread_id].append({
+                        "role": "assistant",
+                        "content": response_text
+                    })
 
-        # Extract the response text
-        if messages.data:
-            message = messages.data[0]
-            if message.role == "assistant":
-                # Extract text from content blocks
-                text_content = []
-                for content in message.content:
-                    if content.type == "text":
-                        text_content.append(content.text.value)
-                return "\n".join(text_content)
+                    return response_text
 
-        return "I apologize, but I couldn't generate a response."
+            except Exception as e:
+                logger.error(f"Error in run_assistant: {str(e)}")
+                raise Exception(f"Failed to get response from AI: {str(e)}")
+
+        # If we hit max iterations
+        return "I apologize, but I encountered an issue processing your request. Please try again."
 
 
 # Import asyncio for sleep

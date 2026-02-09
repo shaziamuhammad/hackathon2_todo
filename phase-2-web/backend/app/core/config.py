@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     # Phase 3: AI Services (at least one required)
     ANTHROPIC_API_KEY: Optional[str] = None
     OPENAI_API_KEY: Optional[str] = None
+    OPENROUTER_API_KEY: Optional[str] = None
 
     # Phase 3: MCP Server
     MCP_SERVER_URL: str = "http://localhost:8001"
