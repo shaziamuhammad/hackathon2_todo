@@ -1,0 +1,136 @@
+/* Theme CSS Variables */
+
+:root {
+  /* Light Theme (Default) */
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-color: #e5e7eb;
+  --accent-color: #9333ea;
+  --accent-hover: #7e22ce;
+}
+
+.dark {
+  /* Dark Theme */
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #2d2d2d;
+  --bg-tertiary: #3d3d3d;
+  --text-primary: #f9fafb;
+  --text-secondary: #d1d5db;
+  --text-tertiary: #9ca3af;
+  --border-color: #4b5563;
+  --accent-color: #a855f7;
+  --accent-hover: #9333ea;
+}
+
+.purple {
+  /* Purple Theme */
+  --bg-primary: #faf5ff;
+  --bg-secondary: #f3e8ff;
+  --bg-tertiary: #e9d5ff;
+  --text-primary: #581c87;
+  --text-secondary: #7e22ce;
+  --text-tertiary: #a855f7;
+  --border-color: #d8b4fe;
+  --accent-color: #9333ea;
+  --accent-hover: #7e22ce;
+}
+
+/* Apply theme variables */
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Component theming */
+.themed-bg-primary {
+  background-color: var(--bg-primary);
+}
+
+.themed-bg-secondary {
+  background-color: var(--bg-secondary);
+}
+
+.themed-bg-tertiary {
+  background-color: var(--bg-tertiary);
+}
+
+.themed-text-primary {
+  color: var(--text-primary);
+}
+
+.themed-text-secondary {
+  color: var(--text-secondary);
+}
+
+.themed-text-tertiary {
+  color: var(--text-tertiary);
+}
+
+.themed-border {
+  border-color: var(--border-color);
+}
+
+.themed-accent {
+  color: var(--accent-color);
+}
+
+.themed-accent-bg {
+  background-color: var(--accent-color);
+}
+
+.themed-accent-bg:hover {
+  background-color: var(--accent-hover);
+}
+
+/* Card theming */
+.themed-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+/* Input theming */
+.themed-input {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+
+.themed-input:focus {
+  border-color: var(--accent-color);
+  outline: none;
+  ring: 2px;
+  ring-color: var(--accent-color);
+}
+
+/* Button theming */
+.themed-button-primary {
+  background-color: var(--accent-color);
+  color: white;
+}
+
+.themed-button-primary:hover {
+  background-color: var(--accent-hover);
+}
+
+.themed-button-secondary {
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.themed-button-secondary:hover {
+  background-color: var(--bg-tertiary);
+}
+
+/* Smooth transitions */
+* {
+  transition-property: background-color, border-color, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease-in-out;
+}

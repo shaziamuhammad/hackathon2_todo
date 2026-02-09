@@ -1,14 +1,33 @@
-from pydantic_settings import BaseSettings
+"""Configuration module for loading environment variables"""
+import os
+from typing import Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
-class Settings(BaseSettings):
-    APP_NAME: str = "Secure Todo API"
-    API_VERSION: str = "v1"
-    ALLOWED_ORIGINS: list[str] = ["*"]
-    DATABASE_URL: str = "sqlite:///./todo_app.db"
-    BETTER_AUTH_SECRET: str = "your-super-secret-jwt-token-with-at-least-32-characters-long"
-    ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+class Config:
+    """Application configuration"""
+
+    # Database
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+
+    # JWT
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-change-in-production")
+    ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+    # AI API Keys
+    ANTHROPIC_API_KEY: Optional[str] = os.getenv("ANTHROPIC_API_KEY")
+    OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
+
+    # MCP Server
+    MCP_SERVER_URL: str = os.getenv("MCP_SERVER_URL", "http://localhost:8001")
+
+    # CORS
+    CORS_ORIGINS: list = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
 
 
-settings = Settings()
+# Create a singleton instance
+config = Config()

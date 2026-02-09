@@ -1,0 +1,433 @@
+openapi: 3.0.3
+info:
+  title: AI-Powered Todo Chatbot API
+  description: API for the AI-powered Todo management system with natural language processing
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Development server
+  - url: https://api.todo-chatbot.com
+    description: Production server
+
+paths:
+  /api/chat:
+    post:
+      summary: Process natural language todo commands
+      description: Accepts natural language input and processes todo operations using AI agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        '200':
+          description: Successful response from AI agent
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        '400':
+          description: Invalid request or natural language could not be processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tasks:
+    get:
+      summary: List all tasks for the user
+      description: Retrieve user's todo items with optional filtering and sorting
+      parameters:
+        - name: priority
+          in: query
+          description: Filter by priority level
+          schema:
+            type: string
+            enum: [low, medium, high, urgent]
+        - name: status
+          in: query
+          description: Filter by task status
+          schema:
+            type: string
+            enum: [pending, in-progress, complete]
+        - name: tag
+          in: query
+          description: Filter by tag
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort by field (due_date, priority, created_at)
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Sort order (asc, desc)
+          schema:
+            type: string
+            enum: [asc, desc]
+      responses:
+        '200':
+          description: List of user's todo items
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tasks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TodoItem'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    post:
+      summary: Create a new task
+      description: Creates a new todo item from provided data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateTodoItem'
+      responses:
+        '201':
+          description: Task created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    $ref: '#/components/schemas/TodoItem'
+        '400':
+          description: Invalid task data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/tasks/{task_id}:
+    get:
+      summary: Get a specific task
+      description: Retrieve a specific todo item by ID
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: Unique identifier of the task
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Task details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    $ref: '#/components/schemas/TodoItem'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    put:
+      summary: Update a task
+      description: Update an existing todo item
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: Unique identifier of the task
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateTodoItem'
+      responses:
+        '200':
+          description: Task updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task:
+                    $ref: '#/components/schemas/TodoItem'
+        '400':
+          description: Invalid task data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+    delete:
+      summary: Delete a task
+      description: Remove a todo item
+      parameters:
+        - name: task_id
+          in: path
+          required: true
+          description: Unique identifier of the task
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Task deleted successfully
+        '401':
+          description: Unauthorized access
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Task not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Natural language command or query
+          example: "Add a task to buy groceries with high priority"
+        conversation_id:
+          type: string
+          description: Optional conversation ID for maintaining context
+
+    ChatResponse:
+      type: object
+      required:
+        - response
+        - action_taken
+      properties:
+        response:
+          type: string
+          description: AI-generated response to the user
+          example: "I've added the task 'buy groceries' with high priority to your list."
+        action_taken:
+          type: string
+          description: Summary of actions taken by the AI
+          example: "Created task with ID 12345"
+        tasks_modified:
+          type: array
+          items:
+            $ref: '#/components/schemas/TodoItem'
+          description: List of tasks that were affected by the operation
+
+    TodoItem:
+      type: object
+      required:
+        - id
+        - title
+        - status
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the task
+          example: "task-12345"
+        title:
+          type: string
+          description: Task title
+          maxLength: 255
+          example: "Buy groceries"
+        description:
+          type: string
+          description: Task description
+          maxLength: 1000
+          example: "Need to buy milk, eggs, and bread"
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+          description: Task priority level
+          default: medium
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tags for categorization
+          example: ["shopping", "urgent"]
+        status:
+          type: string
+          enum: [pending, in-progress, complete]
+          description: Task completion status
+          default: pending
+        due_date:
+          type: string
+          format: date-time
+          description: Due date and time for the task
+          example: "2026-02-10T10:00:00Z"
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when task was created
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when task was last updated
+        completed_at:
+          type: string
+          format: date-time
+          description: Timestamp when task was completed
+        recurrence_pattern:
+          type: object
+          properties:
+            type:
+              type: string
+              enum: [daily, weekly, monthly, yearly]
+            interval:
+              type: integer
+            days_of_week:
+              type: array
+              items:
+                type: integer
+            day_of_month:
+              type: integer
+            ends_on:
+              type: string
+              format: date-time
+          description: Recurrence pattern for recurring tasks
+        user_id:
+          type: string
+          description: Reference to the user who owns the task
+
+    CreateTodoItem:
+      type: object
+      required:
+        - title
+      properties:
+        title:
+          type: string
+          description: Task title
+          maxLength: 255
+        description:
+          type: string
+          description: Task description
+          maxLength: 1000
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+          default: medium
+        tags:
+          type: array
+          items:
+            type: string
+        due_date:
+          type: string
+          format: date-time
+        recurrence_pattern:
+          $ref: '#/components/schemas/RecurrencePattern'
+
+    UpdateTodoItem:
+      type: object
+      properties:
+        title:
+          type: string
+          description: Task title
+          maxLength: 255
+        description:
+          type: string
+          description: Task description
+          maxLength: 1000
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        tags:
+          type: array
+          items:
+            type: string
+        status:
+          type: string
+          enum: [pending, in-progress, complete]
+        due_date:
+          type: string
+          format: date-time
+        recurrence_pattern:
+          $ref: '#/components/schemas/RecurrencePattern'
+
+    RecurrencePattern:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [daily, weekly, monthly, yearly]
+        interval:
+          type: integer
+        days_of_week:
+          type: array
+          items:
+            type: integer
+        day_of_month:
+          type: integer
+        ends_on:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Error message
+        details:
+          type: object
+          description: Additional error details
