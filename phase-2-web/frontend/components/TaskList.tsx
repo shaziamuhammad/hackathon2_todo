@@ -11,16 +11,21 @@ interface TaskListProps {
 
 export default function TaskList({ tasks, onUpdate, onDelete, onToggleComplete, loading }: TaskListProps) {
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [editText, setEditText] = useState('')
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
 
   const startEditing = (task: Task) => {
     setEditingId(task.id)
-    setEditText(task.title)
+    setEditTitle(task.title)
+    setEditDescription(task.description || '')
   }
 
   const saveEdit = (id: string) => {
-    if (editText.trim()) {
-      onUpdate(id, { title: editText.trim() })
+    if (editTitle.trim()) {
+      onUpdate(id, {
+        title: editTitle.trim(),
+        description: editDescription.trim() || undefined
+      })
       setEditingId(null)
     }
   }
@@ -52,31 +57,44 @@ export default function TaskList({ tasks, onUpdate, onDelete, onToggleComplete, 
               />
               <div>
                 {editingId === task.id ? (
-                  <>
+                  <div className="space-y-2">
                     <input
                       type="text"
-                      value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
-                      className="border rounded px-2 py-1 mr-2"
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                      placeholder="Task title"
                       onKeyDown={(e) => {
                         if (e.key === 'Enter') saveEdit(task.id)
                         if (e.key === 'Escape') cancelEdit()
                       }}
                       autoFocus
                     />
-                    <button
-                      onClick={() => saveEdit(task.id)}
-                      className="bg-blue-500 text-white px-2 py-1 rounded mr-1"
-                    >
-                      Save
-                    </button>
-                    <button
-                      onClick={cancelEdit}
-                      className="bg-gray-500 text-white px-2 py-1 rounded"
-                    >
-                      Cancel
-                    </button>
-                  </>
+                    <textarea
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      className="w-full border rounded px-2 py-1 text-gray-900 bg-white"
+                      placeholder="Task description (optional)"
+                      rows={2}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') cancelEdit()
+                      }}
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={() => saveEdit(task.id)}
+                        className="bg-blue-500 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={cancelEdit}
+                        className="bg-gray-500 text-white px-3 py-1 rounded text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <h3 className={`font-medium ${task.completed ? 'line-through text-gray-500' : 'text-gray-900'}`}>
