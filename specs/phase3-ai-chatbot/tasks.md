@@ -208,7 +208,7 @@ description: "Task list for AI-Powered Todo Chatbot implementation"
 - [X] T097 [P] Add rate limiting to /api/chat endpoint in phase-2-web/backend/main.py to prevent abuse
 - [X] T098 [P] Update phase-2-web/frontend/src/components/ChatWidget.tsx styling to match purple theme
 - [X] T099 [P] Add loading states for all async operations in phase-2-web/frontend/src/components/
-- [ ] T100 [P] Add accessibility attributes (ARIA labels) to all UI components in phase-2-web/frontend/src/components/
+- [X] T100 [P] Add accessibility attributes (ARIA labels) to all UI components in phase-2-web/frontend/src/components/
 - [X] T101 Update README.md with setup instructions from quickstart.md
 - [X] T102 Create API documentation from contracts/api.yaml in docs/api.md
 - [ ] T103 Run quickstart.md validation to ensure all setup steps work correctly
