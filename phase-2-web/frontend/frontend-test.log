@@ -1,0 +1,21 @@
+
+> phase2-web-frontend@0.1.0 dev
+> next dev
+
+ ⚠ Port 3000 is in use, trying 3001 instead.
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3001
+  - Environments: .env.local
+
+ ✓ Starting...
+ ⚠ Invalid next.config.js options detected: 
+ ⚠     Unrecognized key(s) in object: 'appDir' at "experimental"
+ ⚠ See more info here: https://nextjs.org/docs/messages/invalid-next-config
+[Error: EPERM: operation not permitted, open 'D:\hackathon2_todo\phase-2-web\frontend\.next\trace'] {
+  errno: -4048,
+  code: 'EPERM',
+  syscall: 'open',
+  path: 'D:\\hackathon2_todo\\phase-2-web\\frontend\\.next\\trace'
+}
+ ✓ Ready in 3.9s
+[?25h
