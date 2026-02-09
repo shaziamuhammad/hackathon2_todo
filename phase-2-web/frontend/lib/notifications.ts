@@ -115,3 +115,36 @@ class NotificationManager {
 
 // Export singleton instance
 export const notificationManager = new NotificationManager();
+
+// Helper function to show task due notification
+export async function showTaskDueNotification(taskTitle: string, dueDate: Date): Promise<void> {
+  const timeUntilDue = dueDate.getTime() - Date.now();
+  const hoursUntilDue = Math.floor(timeUntilDue / (1000 * 60 * 60));
+  const minutesUntilDue = Math.floor((timeUntilDue % (1000 * 60 * 60)) / (1000 * 60));
+
+  let body = '';
+  if (hoursUntilDue > 0) {
+    body = `Due in ${hoursUntilDue} hour${hoursUntilDue > 1 ? 's' : ''}`;
+  } else if (minutesUntilDue > 0) {
+    body = `Due in ${minutesUntilDue} minute${minutesUntilDue > 1 ? 's' : ''}`;
+  } else {
+    body = 'Due now!';
+  }
+
+  await notificationManager.showNotification({
+    title: `Task Due: ${taskTitle}`,
+    body: body,
+    tag: `task-due-${taskTitle}`,
+    requireInteraction: true
+  });
+}
+
+// Helper function to show task reminder notification
+export async function showTaskReminderNotification(taskTitle: string): Promise<void> {
+  await notificationManager.showNotification({
+    title: 'Task Reminder',
+    body: `Don't forget: ${taskTitle}`,
+    tag: `task-reminder-${taskTitle}`,
+    requireInteraction: false
+  });
+}
