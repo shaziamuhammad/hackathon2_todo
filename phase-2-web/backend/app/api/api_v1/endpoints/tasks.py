@@ -21,7 +21,7 @@ async def get_tasks(user_id: str, current_user_id: str = Depends(get_current_use
         # Get all tasks for the specified user
         statement = select(Task).where(Task.user_id == UUID(user_id))
         result = await session.execute(statement)
-        tasks = result.all()
+        tasks = result.scalars().all()
 
         return tasks
     except Exception as e:

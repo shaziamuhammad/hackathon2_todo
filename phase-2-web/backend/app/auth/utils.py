@@ -4,34 +4,36 @@ from typing import Optional
 import jwt
 from jwt.exceptions import InvalidTokenError
 from fastapi import HTTPException, status
-from passlib.context import CryptContext
+import bcrypt
 from app.core.config import settings
 
 
-# Initialize the password context with multiple schemes for compatibility
-pwd_context = CryptContext(schemes=["argon2", "bcrypt"], deprecated="auto")
-
-
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    # Apply the same truncation for verification to match how it was hashed
-    plain_password_bytes = plain_password.encode('utf-8')
-    if len(plain_password_bytes) > 72:
-        plain_password = plain_password_bytes[:72].decode('utf-8', errors='ignore')
+    """Verify a password against a bcrypt hash"""
     try:
-        return pwd_context.verify(plain_password, hashed_password)
+        # Convert strings to bytes
+        password_bytes = plain_password.encode('utf-8')
+        # Bcrypt has a 72-byte limit
+        if len(password_bytes) > 72:
+            password_bytes = password_bytes[:72]
+
+        hash_bytes = hashed_password.encode('utf-8')
+        return bcrypt.checkpw(password_bytes, hash_bytes)
     except Exception:
-        # If verification fails for any reason, return False
         return False
 
 
 def get_password_hash(password: str) -> str:
-    # Bcrypt has a 72-byte limit, so we truncate if necessary
-    # Need to check the byte length, not character length
+    """Hash a password using bcrypt"""
+    # Convert to bytes and truncate to 72 bytes if necessary
     password_bytes = password.encode('utf-8')
     if len(password_bytes) > 72:
-        # Truncate to 72 bytes and decode back to string
-        password = password_bytes[:72].decode('utf-8', errors='ignore')
-    return pwd_context.hash(password)
+        password_bytes = password_bytes[:72]
+
+    # Generate salt and hash
+    salt = bcrypt.gensalt()
+    hashed = bcrypt.hashpw(password_bytes, salt)
+    return hashed.decode('utf-8')
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):

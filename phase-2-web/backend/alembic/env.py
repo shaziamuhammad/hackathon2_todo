@@ -26,6 +26,14 @@ target_metadata = SQLModel.metadata
 # ... etc.
 
 
+def get_sync_database_url(async_url: str) -> str:
+    """Convert async database URL to sync URL for Alembic migrations."""
+    # Replace asyncpg with psycopg2 for synchronous operations
+    if '+asyncpg' in async_url:
+        return async_url.replace('+asyncpg', '+psycopg2')
+    return async_url
+
+
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
 
@@ -38,7 +46,7 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    url = settings.DATABASE_URL
+    url = get_sync_database_url(settings.DATABASE_URL)
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -58,7 +66,7 @@ def run_migrations_online() -> None:
 
     """
     configuration = config.get_section(config.config_ini_section)
-    configuration['sqlalchemy.url'] = settings.DATABASE_URL
+    configuration['sqlalchemy.url'] = get_sync_database_url(settings.DATABASE_URL)
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
