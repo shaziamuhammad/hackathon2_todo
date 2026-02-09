@@ -1,13 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "cd phase-2-web/frontend && npm install && npm run build",
-  "outputDirectory": "phase-2-web/frontend/.next",
-  "installCommand": "cd phase-2-web/frontend && npm install",
-  "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/phase-2-web/frontend/$1"
-    }
-  ]
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "framework": "nextjs"
 }
