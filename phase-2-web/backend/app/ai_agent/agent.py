@@ -249,7 +249,8 @@ class TodoAssistant:
     def __init__(self):
         self.client = client
         self.tool_handlers = None
-        self.model = "openai/gpt-3.5-turbo"  # Default model, can be changed
+        # Use free model to avoid costs - requires OpenRouter account but no credits
+        self.model = "meta-llama/llama-3.1-8b-instruct:free"
         self.conversations = {}  # Store conversation history per thread_id
 
     async def initialize(self, tool_handlers: Dict[str, Any]):
