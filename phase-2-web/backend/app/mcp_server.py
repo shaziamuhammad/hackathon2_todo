@@ -11,9 +11,14 @@ from uuid import UUID
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 import json
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Initialize MCP server
 mcp = FastMCP("Todo Task Manager")
+logger.info("MCP server initialized: Todo Task Manager")
 
 
 @mcp.tool()
@@ -42,8 +47,11 @@ async def add_task(
         Dict containing the created task details
     """
     try:
+        logger.info(f"MCP add_task called - user_id: {user_id}, title: '{title}', priority: {priority}")
+
         # Validate title
         if not title or title.strip() == "":
+            logger.warning(f"MCP add_task failed - empty title for user {user_id}")
             return {"error": "Title is required", "success": False}
 
         # Parse due_date if provided
@@ -76,6 +84,8 @@ async def add_task(
             await session.commit()
             await session.refresh(db_task)
 
+            logger.info(f"MCP add_task success - created task {db_task.id} for user {user_id}")
+
             return {
                 "success": True,
                 "task": {
@@ -94,6 +104,7 @@ async def add_task(
         finally:
             await session.close()
     except Exception as e:
+        logger.error(f"MCP add_task error for user {user_id}: {str(e)}", exc_info=True)
         return {"error": f"Failed to create task: {str(e)}", "success": False}
 
 
@@ -151,6 +162,8 @@ async def list_tasks(
             result = await session.execute(statement)
             tasks = result.scalars().all()
 
+            logger.info(f"MCP list_tasks success - found {len(tasks)} tasks for user {user_id}")
+
             return {
                 "success": True,
                 "count": len(tasks),
@@ -175,6 +188,7 @@ async def list_tasks(
         finally:
             await session.close()
     except Exception as e:
+        logger.error(f"MCP list_tasks error for user {user_id}: {str(e)}", exc_info=True)
         return {"error": f"Failed to list tasks: {str(e)}", "success": False}
 
 

@@ -6,10 +6,15 @@ from openai import AsyncOpenAI
 from typing import Dict, Any, List, Optional
 import os
 import json
+import logging
 from app.core.config import settings
+
+# Set up logging
+logger = logging.getLogger(__name__)
 
 # Initialize OpenAI client
 client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
+logger.info("OpenAI client initialized for AI agent")
 
 # Assistant instructions
 ASSISTANT_INSTRUCTIONS = """You are an AI-powered todo task management assistant. You help users manage their tasks through natural language conversations.

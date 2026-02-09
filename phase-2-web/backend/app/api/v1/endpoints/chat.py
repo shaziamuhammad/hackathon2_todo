@@ -2,11 +2,13 @@
 Chat endpoint for AI-powered todo management
 Uses OpenAI Assistants API with MCP tool integration
 """
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel
 from typing import Optional, Dict, Any
 from app.auth.middleware import get_current_user_id
 from app.ai_agent.agent import get_assistant
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 import sys
 import os
 import logging
@@ -17,6 +19,9 @@ from app.mcp_server import add_task, list_tasks, update_task, delete_task, mark_
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
+
+# Initialize rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 
 class ChatRequest(BaseModel):
@@ -34,7 +39,9 @@ conversation_threads: Dict[str, str] = {}
 
 
 @router.post("/chat", response_model=ChatResponse, summary="Process natural language todo commands")
+@limiter.limit("20/minute")  # Rate limit: 20 requests per minute per IP
 async def chat(
+    http_request: Request,
     request: ChatRequest,
     current_user_id: str = Depends(get_current_user_id)
 ):

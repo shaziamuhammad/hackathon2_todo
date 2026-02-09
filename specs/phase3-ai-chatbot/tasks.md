@@ -52,7 +52,7 @@ description: "Task list for AI-Powered Todo Chatbot implementation"
 - [X] T013 [P] Extend User model in phase-2-web/backend/models.py to add provider and provider_id fields for OAuth
 - [X] T014 Create Conversation model in phase-2-web/backend/models.py with user_id, messages array, timestamps
 - [X] T015 Create database migration script for new fields in phase-2-web/backend/migrations/ or alembic/
-- [ ] T016 Run database migrations to update schema in Neon DB
+- [X] T016 Run database migrations to update schema in Neon DB
 - [X] T017 Create phase-2-web/backend/config.py to load environment variables (API keys, MCP server URL)
 - [X] T018 Create phase-2-web/backend/utils/date_parser.py for natural language date parsing using python-dateutil
 
@@ -75,7 +75,7 @@ description: "Task list for AI-Powered Todo Chatbot implementation"
 - [X] T023 [P] [US1] Implement list_tasks MCP tool in phase-2-web/backend/mcp_server.py with filtering and sorting
 - [X] T024 [P] [US1] Implement mark_complete MCP tool in phase-2-web/backend/mcp_server.py with status validation
 - [X] T025 [US1] Add MCP server startup script and configuration in phase-2-web/backend/mcp_server.py
-- [ ] T026 [US1] Test MCP server by running it standalone on port 8001 and verifying tool exposure
+- [X] T026 [US1] Test MCP server by running it standalone on port 8001 and verifying tool exposure
 
 ### AI Agent Integration for User Story 1
 
@@ -200,17 +200,17 @@ description: "Task list for AI-Powered Todo Chatbot implementation"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T092 [P] Add comprehensive error handling across all backend endpoints in phase-2-web/backend/main.py
-- [ ] T093 [P] Add logging for all AI agent operations in phase-2-web/backend/ai_agent.py
-- [ ] T094 [P] Add logging for all MCP tool calls in phase-2-web/backend/mcp_server.py
+- [X] T092 [P] Add comprehensive error handling across all backend endpoints in phase-2-web/backend/main.py
+- [X] T093 [P] Add logging for all AI agent operations in phase-2-web/backend/ai_agent.py
+- [X] T094 [P] Add logging for all MCP tool calls in phase-2-web/backend/mcp_server.py
 - [ ] T095 [P] Optimize database queries in phase-2-web/backend/crud.py for list_tasks with filters
-- [ ] T096 [P] Add input validation for all API endpoints in phase-2-web/backend/main.py
-- [ ] T097 [P] Add rate limiting to /api/chat endpoint in phase-2-web/backend/main.py to prevent abuse
-- [ ] T098 [P] Update phase-2-web/frontend/src/components/ChatWidget.tsx styling to match purple theme
-- [ ] T099 [P] Add loading states for all async operations in phase-2-web/frontend/src/components/
+- [X] T096 [P] Add input validation for all API endpoints in phase-2-web/backend/main.py
+- [X] T097 [P] Add rate limiting to /api/chat endpoint in phase-2-web/backend/main.py to prevent abuse
+- [X] T098 [P] Update phase-2-web/frontend/src/components/ChatWidget.tsx styling to match purple theme
+- [X] T099 [P] Add loading states for all async operations in phase-2-web/frontend/src/components/
 - [ ] T100 [P] Add accessibility attributes (ARIA labels) to all UI components in phase-2-web/frontend/src/components/
-- [ ] T101 Update README.md with setup instructions from quickstart.md
-- [ ] T102 Create API documentation from contracts/api.yaml in docs/api.md
+- [X] T101 Update README.md with setup instructions from quickstart.md
+- [X] T102 Create API documentation from contracts/api.yaml in docs/api.md
 - [ ] T103 Run quickstart.md validation to ensure all setup steps work correctly
 - [ ] T104 Verify all success criteria from spec.md are met (95% accuracy, 3-second response time, etc.)
 
