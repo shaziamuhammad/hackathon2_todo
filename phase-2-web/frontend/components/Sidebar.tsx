@@ -77,6 +77,8 @@ export default function Sidebar({ onFilterChange, isOpen = true, onClose }: Side
           ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
           overflow-y-auto
         `}
+        aria-label="Task filters and sorting"
+        role="complementary"
       >
         <div className="p-4">
           {/* Header */}
