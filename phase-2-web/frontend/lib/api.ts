@@ -1,7 +1,7 @@
 // phase-2-web\frontend\lib\api.ts
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
 
 // Create axios instance
 const api = axios.create({
@@ -26,10 +26,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect on 401 if we're not on the login or register pages
     if (error.response?.status === 401) {
-      // Remove token and redirect to login
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+      const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+      const isAuthPage = currentPath === '/login' || currentPath === '/register';
+
+      if (!isAuthPage) {
+        // Remove token and redirect to login only if not already on auth pages
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

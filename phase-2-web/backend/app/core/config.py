@@ -23,10 +23,24 @@ class Settings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
-    # Internal field to capture the raw ALLOWED_ORIGINS environment variable
-    RAW_ALLOWED_ORIGINS: str = Field(default='["*"]', alias='ALLOWED_ORIGINS')
+    # Phase 3: AI Services (at least one required)
+    ANTHROPIC_API_KEY: Optional[str] = None
+    OPENAI_API_KEY: Optional[str] = None
 
-    # CORS - This will be processed from the raw ALLOWED_ORIGINS
+    # Phase 3: MCP Server
+    MCP_SERVER_URL: str = "http://localhost:8001"
+
+    # Phase 3: OAuth Providers (optional)
+    GOOGLE_CLIENT_ID: Optional[str] = None
+    GOOGLE_CLIENT_SECRET: Optional[str] = None
+    FACEBOOK_CLIENT_ID: Optional[str] = None
+    FACEBOOK_CLIENT_SECRET: Optional[str] = None
+
+    # CORS Origins - support both ALLOWED_ORIGINS and CORS_ORIGINS
+    ALLOWED_ORIGINS: Optional[str] = None
+    CORS_ORIGINS: Optional[str] = None
+
+    # CORS - This will be processed from ALLOWED_ORIGINS or CORS_ORIGINS
     BACKEND_CORS_ORIGINS: List[str] = ["*"]
 
     class Config:
@@ -36,14 +50,20 @@ class Settings(BaseSettings):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # Process the raw allowed origins after initialization
-        try:
-            parsed_origins = json.loads(self.RAW_ALLOWED_ORIGINS)
-            if isinstance(parsed_origins, list):
-                self.BACKEND_CORS_ORIGINS = parsed_origins
-        except (json.JSONDecodeError, TypeError):
-            # If parsing fails, keep the default
-            pass
+        # Process CORS origins - prefer CORS_ORIGINS, fallback to ALLOWED_ORIGINS
+        origins_str = self.CORS_ORIGINS or self.ALLOWED_ORIGINS
+
+        if origins_str:
+            try:
+                # Try parsing as JSON first
+                parsed_origins = json.loads(origins_str)
+                if isinstance(parsed_origins, list):
+                    self.BACKEND_CORS_ORIGINS = parsed_origins
+            except (json.JSONDecodeError, TypeError):
+                # If not JSON, split by comma
+                self.BACKEND_CORS_ORIGINS = [
+                    origin.strip() for origin in origins_str.split(',')
+                ]
 
 
 settings = Settings()

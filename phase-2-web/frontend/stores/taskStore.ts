@@ -38,17 +38,23 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   createTask: async (userId, task) => {
     set({ loading: true, error: null })
     try {
+      console.log('Creating task for user:', userId, 'Task data:', task)
       const response = await api.post(`/tasks/${userId}/tasks`, task)
 
-      if (response.status !== 200) {
+      console.log('Create task response:', response.status, response.data)
+
+      if (response.status !== 200 && response.status !== 201) {
         throw new Error('Failed to create task')
       }
 
       const newTask = response.data
       set((state) => ({ tasks: [...state.tasks, newTask], loading: false }))
+      return newTask
     } catch (error: any) {
-      set({ error: error.message, loading: false })
-      throw error
+      console.error('Create task error:', error)
+      const errorMessage = error.response?.data?.detail || error.message || 'Failed to create task'
+      set({ error: errorMessage, loading: false })
+      throw new Error(errorMessage)
     }
   },
 

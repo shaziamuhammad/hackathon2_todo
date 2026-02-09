@@ -1,24 +1,79 @@
-﻿__pycache__/
+﻿# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 .pytest_cache/
-*.pyc
-.claude/settings.local.json
-.env
+.venv/
+venv/
+ENV/
+env/
+# Python lib directories (but not frontend/lib)
+phase-1-console/lib/
+phase-2-web/backend/lib/
 
-# Ignore Next.js build directory
-.next/
+# Node.js / JavaScript / TypeScript
 node_modules/
-# --- Frontend ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+.next/
+out/
+build/
+dist/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Claude Code
+.claude/settings.local.json
+
+# Frontend specific
 phase-2-web/frontend/node_modules/
 phase-2-web/frontend/.next/
 phase-2-web/frontend/out/
 phase-2-web/frontend/.env.local
 phase-2-web/frontend/.env.*.local
 
-# --- Backend env ---
+# Backend specific
 phase-2-web/backend/.env
 phase-2-web/backend/.env.*
 phase-2-web/backend/.venv/
+phase-2-web/backend/__pycache__/
+phase-2-web/backend/*.pyc
+phase-2-web/backend/app/__pycache__/
 
-# --- OS ---
+# OS
 .DS_Store
 Thumbs.db
+*.tmp
+*.log

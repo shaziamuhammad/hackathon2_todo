@@ -46,7 +46,7 @@ export default function TaskForm({ onSubmit, loading }: TaskFormProps) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={loading}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 text-gray-900 bg-white"
           placeholder="Enter task title"
         />
       </div>
@@ -61,7 +61,7 @@ export default function TaskForm({ onSubmit, loading }: TaskFormProps) {
           onChange={(e) => setDescription(e.target.value)}
           rows={3}
           disabled={loading}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:opacity-50 text-gray-900 bg-white"
           placeholder="Enter task description (optional)"
         />
       </div>

@@ -1,14 +1,11 @@
 /**
- * NextAuth.js Configuration
- * OAuth providers: Google, Facebook, Email/Password
+ * NextAuth Configuration
+ * Integrates with backend API for authentication
  */
 import { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import axios from 'axios';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -16,107 +13,93 @@ export const authOptions: NextAuthOptions = {
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      authorization: {
-        params: {
-          prompt: 'consent',
-          access_type: 'offline',
-          response_type: 'code'
-        }
-      }
     }),
-
     // Facebook OAuth Provider
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID || '',
-      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || ''
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET || '',
     }),
-
-    // Email/Password Credentials Provider
+    // Email/Password Provider
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+
         try {
-          if (!credentials?.email || !credentials?.password) {
+          const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api/v1';
+
+          const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: credentials.email,
+              password: credentials.password,
+            }),
+          });
+
+          if (!response.ok) {
             return null;
           }
 
-          // Authenticate with backend
-          const response = await axios.post(`${API_BASE_URL}/api/v1/auth/login`, {
-            email: credentials.email,
-            password: credentials.password
-          });
+          const data = await response.json();
 
-          if (response.data && response.data.access_token) {
+          if (data.access_token) {
             return {
-              id: response.data.user_id,
-              email: credentials.email,
-              accessToken: response.data.access_token
+              id: data.user?.id || data.user?.email,
+              email: data.user?.email || credentials.email,
+              name: data.user?.name || data.user?.email,
+              accessToken: data.access_token,
             };
           }
 
           return null;
         } catch (error) {
-          console.error('Authentication error:', error);
+          console.error('Auth error:', error);
           return null;
         }
-      }
-    })
+      },
+    }),
   ],
-
   callbacks: {
     async jwt({ token, user, account }) {
-      // Initial sign in
-      if (account && user) {
-        // For OAuth providers
-        if (account.provider === 'google' || account.provider === 'facebook') {
-          try {
-            // Send OAuth token to backend for verification
-            const response = await axios.post(`${API_BASE_URL}/api/v1/auth/oauth`, {
-              provider: account.provider,
-              access_token: account.access_token,
-              id_token: account.id_token,
-              email: user.email,
-              name: user.name
-            });
-
-            token.accessToken = response.data.access_token;
-            token.userId = response.data.user_id;
-          } catch (error) {
-            console.error('OAuth backend verification failed:', error);
-          }
-        } else {
-          // For credentials provider
-          token.accessToken = (user as any).accessToken;
-          token.userId = user.id;
-        }
+      if (user) {
+        token.accessToken = (user as any).accessToken;
+        token.id = user.id;
       }
-
+      // Handle OAuth providers
+      if (account?.provider === 'google' || account?.provider === 'facebook') {
+        token.provider = account.provider;
+        token.providerAccountId = account.providerAccountId;
+      }
       return token;
     },
-
     async session({ session, token }) {
-      // Add custom fields to session
       if (token) {
+        session.user = {
+          ...session.user,
+          id: token.id as string,
+        };
         (session as any).accessToken = token.accessToken;
-        (session as any).userId = token.userId;
+        (session as any).provider = token.provider;
       }
       return session;
-    }
+    },
   },
-
   pages: {
     signIn: '/login',
-    error: '/login'
+    signOut: '/login',
+    error: '/login',
   },
-
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60 // 30 days
   },
-
-  secret: process.env.NEXTAUTH_SECRET
+  secret: process.env.NEXTAUTH_SECRET || 'development-secret-change-in-production',
 };

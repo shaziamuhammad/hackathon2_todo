@@ -25,12 +25,18 @@ export default function DashboardPage() {
   }, [isAuthenticated, user, fetchTasks, router])
 
   const handleAddTask = async (task: TaskInput) => {
-    if (user) {
-      try {
-        await useTaskStore.getState().createTask(user.id, task)
-      } catch (err) {
-        console.error('Failed to add task:', err)
-      }
+    if (!user) {
+      alert('Error: User not authenticated. Please refresh the page.')
+      return
+    }
+
+    try {
+      await useTaskStore.getState().createTask(user.id, task)
+      // Refresh the task list after creation
+      await fetchTasks(user.id)
+    } catch (err: any) {
+      console.error('Failed to add task:', err)
+      alert(`Failed to add task: ${err.message || 'Unknown error'}`)
     }
   }
 

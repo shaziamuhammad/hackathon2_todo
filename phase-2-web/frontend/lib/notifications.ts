@@ -1,41 +1,47 @@
 /**
- * Browser Notification Utilities
- * Handles browser notification API integration
+ * Browser Notifications Manager
+ * Handles notification permissions and display
  */
 
 export interface NotificationOptions {
   title: string;
   body: string;
   icon?: string;
+  badge?: string;
   tag?: string;
   requireInteraction?: boolean;
+  silent?: boolean;
+  data?: any;
 }
 
 class NotificationManager {
-  private permission: NotificationPermission = 'default';
-
-  constructor() {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      this.permission = Notification.permission;
-    }
+  /**
+   * Check if browser supports notifications
+   */
+  isSupported(): boolean {
+    return 'Notification' in window && 'serviceWorker' in navigator;
   }
 
   /**
-   * Request permission to show notifications
+   * Get current notification permission status
+   */
+  getPermissionStatus(): NotificationPermission {
+    if (!this.isSupported()) {
+      return 'denied';
+    }
+    return Notification.permission;
+  }
+
+  /**
+   * Request notification permission from user
    */
   async requestPermission(): Promise<boolean> {
-    if (!('Notification' in window)) {
-      console.warn('This browser does not support notifications');
+    if (!this.isSupported()) {
       return false;
-    }
-
-    if (this.permission === 'granted') {
-      return true;
     }
 
     try {
       const permission = await Notification.requestPermission();
-      this.permission = permission;
       return permission === 'granted';
     } catch (error) {
       console.error('Error requesting notification permission:', error);
@@ -44,103 +50,68 @@ class NotificationManager {
   }
 
   /**
-   * Show a browser notification
+   * Show a notification
    */
-  async showNotification(options: NotificationOptions): Promise<boolean> {
-    if (!('Notification' in window)) {
-      console.warn('This browser does not support notifications');
-      return false;
+  async showNotification(options: NotificationOptions): Promise<void> {
+    if (!this.isSupported()) {
+      console.warn('Notifications not supported');
+      return;
     }
 
-    // Request permission if not already granted
-    if (this.permission !== 'granted') {
-      const granted = await this.requestPermission();
-      if (!granted) {
-        return false;
-      }
+    if (this.getPermissionStatus() !== 'granted') {
+      console.warn('Notification permission not granted');
+      return;
     }
 
     try {
-      const notification = new Notification(options.title, {
-        body: options.body,
-        icon: options.icon || '/icon-192x192.png',
-        tag: options.tag,
-        requireInteraction: options.requireInteraction || false,
-        badge: '/icon-96x96.png'
-      });
-
-      // Auto-close after 5 seconds if not requiring interaction
-      if (!options.requireInteraction) {
-        setTimeout(() => notification.close(), 5000);
+      // If service worker is available, use it for better notification handling
+      if ('serviceWorker' in navigator) {
+        const registration = await navigator.serviceWorker.ready;
+        await registration.showNotification(options.title, {
+          body: options.body,
+          icon: options.icon || '/favicon.svg',
+          badge: options.badge || '/favicon.svg',
+          tag: options.tag,
+          requireInteraction: options.requireInteraction ?? false,
+          silent: options.silent ?? false,
+          data: options.data,
+        });
+      } else {
+        // Fallback to basic notification
+        new Notification(options.title, {
+          body: options.body,
+          icon: options.icon || '/favicon.svg',
+          tag: options.tag,
+          requireInteraction: options.requireInteraction ?? false,
+          silent: options.silent ?? false,
+          data: options.data,
+        });
       }
-
-      // Handle notification click
-      notification.onclick = () => {
-        window.focus();
-        notification.close();
-      };
-
-      return true;
     } catch (error) {
       console.error('Error showing notification:', error);
-      return false;
     }
   }
 
   /**
-   * Check if notifications are supported and permitted
+   * Schedule a notification for a specific time
    */
-  isSupported(): boolean {
-    return typeof window !== 'undefined' && 'Notification' in window;
-  }
+  scheduleNotification(options: NotificationOptions, scheduledTime: Date): void {
+    const now = new Date().getTime();
+    const scheduledTimeMs = scheduledTime.getTime();
+    const delay = scheduledTimeMs - now;
 
-  /**
-   * Check if permission is granted
-   */
-  isPermissionGranted(): boolean {
-    return this.permission === 'granted';
-  }
+    if (delay <= 0) {
+      // Time has already passed, show immediately
+      this.showNotification(options);
+      return;
+    }
 
-  /**
-   * Get current permission status
-   */
-  getPermissionStatus(): NotificationPermission {
-    return this.permission;
+    // Schedule for future
+    setTimeout(() => {
+      this.showNotification(options);
+    }, delay);
   }
 }
 
-// Create singleton instance
+// Export singleton instance
 export const notificationManager = new NotificationManager();
-
-// Helper function to show task due notification
-export async function showTaskDueNotification(taskTitle: string, dueDate: Date): Promise<boolean> {
-  const timeUntilDue = dueDate.getTime() - Date.now();
-  const hoursUntilDue = Math.floor(timeUntilDue / (1000 * 60 * 60));
-  const minutesUntilDue = Math.floor((timeUntilDue % (1000 * 60 * 60)) / (1000 * 60));
-
-  let body = '';
-  if (hoursUntilDue > 0) {
-    body = `Due in ${hoursUntilDue} hour${hoursUntilDue > 1 ? 's' : ''}`;
-  } else if (minutesUntilDue > 0) {
-    body = `Due in ${minutesUntilDue} minute${minutesUntilDue > 1 ? 's' : ''}`;
-  } else {
-    body = 'Due now!';
-  }
-
-  return notificationManager.showNotification({
-    title: `Task Due: ${taskTitle}`,
-    body: body,
-    tag: `task-due-${taskTitle}`,
-    requireInteraction: true
-  });
-}
-
-// Helper function to show task reminder notification
-export async function showTaskReminderNotification(taskTitle: string): Promise<boolean> {
-  return notificationManager.showNotification({
-    title: 'Task Reminder',
-    body: `Don't forget: ${taskTitle}`,
-    tag: `task-reminder-${taskTitle}`,
-    requireInteraction: false
-  });
-}
